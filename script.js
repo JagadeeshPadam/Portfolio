@@ -98,28 +98,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  /* ── CUSTOM BAT CURSOR ──────────────────────────────── */
-  const cursor = document.getElementById('batCursor');
-  let cx = 0, cy = 0;
-  let tx = 0, ty = 0;
-
-  document.addEventListener('mousemove', e => {
-    tx = e.clientX; ty = e.clientY;
-  });
-
-  function animateCursor() {
-    cx += (tx - cx) * 0.12;
-    cy += (ty - cy) * 0.12;
-    cursor.style.left = cx + 'px';
-    cursor.style.top  = cy + 'px';
-    requestAnimationFrame(animateCursor);
+  /* ── CUSTOM BAT CURSOR (mouse/desktop only) ─────────── */
+  const isTouch = window.matchMedia('(hover: none)').matches;
+  const cursor  = document.getElementById('batCursor');
+  if (!isTouch && cursor) {
+    let cx = 0, cy = 0, tx = 0, ty = 0;
+    document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+    (function animateCursor() {
+      cx += (tx - cx) * 0.12;
+      cy += (ty - cy) * 0.12;
+      cursor.style.left = cx + 'px';
+      cursor.style.top  = cy + 'px';
+      requestAnimationFrame(animateCursor);
+    })();
+    document.querySelectorAll('a, button, .proj-card, .ach-card, .skill-pills span').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
   }
-  animateCursor();
-
-  document.querySelectorAll('a, button, .proj-card, .ach-card, .skill-pills span').forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-  });
 
 
   /* ── SCROLL REVEAL ──────────────────────────────────── */
@@ -226,23 +222,25 @@ document.addEventListener('DOMContentLoaded', () => {
   document.head.appendChild(style);
 
 
-  /* ── PROJ CARD MOUSE GLOW ───────────────────────────── */
-  document.querySelectorAll('.proj-card').forEach(card => {
-    card.addEventListener('mousemove', e => {
-      const rect  = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const glow = card.querySelector('.proj-glow');
-      if (glow) {
-        glow.style.background =
-          `radial-gradient(circle at ${x}px ${y}px, rgba(240,197,0,0.07), transparent 55%)`;
-      }
+  /* ── PROJ CARD MOUSE GLOW (mouse only) ─────────────── */
+  if (!isTouch) {
+    document.querySelectorAll('.proj-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const glow = card.querySelector('.proj-glow');
+        if (glow) {
+          glow.style.background =
+            `radial-gradient(circle at ${x}px ${y}px, rgba(240,197,0,0.07), transparent 55%)`;
+        }
+      });
     });
-  });
+  }
 
 
-  /* ── ACHIEVEMENT CARD 3D TILT ───────────────────────── */
-  document.querySelectorAll('.ach-card').forEach(card => {
+  /* ── ACHIEVEMENT CARD 3D TILT (mouse only) ──────────── */
+  if (!isTouch) document.querySelectorAll('.ach-card').forEach(card => {
     card.addEventListener('mousemove', e => {
       const rect = card.getBoundingClientRect();
       const cx   = rect.left + rect.width  / 2;
